@@ -1,10 +1,12 @@
 [Unit]
-Description=My Python Script
-After=network.target
+Description=Arctis Nova 7 Wireless
+After=default.target
 
 [Service]
-ExecStart=/usr/bin/python3 .local/bin/Arctis_7_Plus_ChatMix.py
+Type=simple
+TimeoutStartSec=0
+ExecStart=/usr/bin/python3 %h/.local/bin/Arctis_7_Plus_ChatMix.py
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
