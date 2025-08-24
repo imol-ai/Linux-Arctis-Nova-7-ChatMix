@@ -1,4 +1,3 @@
-# TODO: use envsubst to fill in the appropriate $USER in install.sh
 SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="2202", OWNER="${USER}", GROUP="${USER}", MODE="0664"
 
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="2202", TAG+="systemd", ENV{SYSTEMD_ALIAS}="/dev/arctis7"
