@@ -7,23 +7,23 @@ import re
 import hid
 import time
 
-class Arctis7PlusChatMix:
+class ArctisNova7ChatMix:
 	def __init__(self):
 
 		# set to receive signal from systemd for termination
 		signal.signal(signal.SIGTERM, self.__handle_sigterm)
 
 		self.log = self._init_log()
-		self.log.info("Initializing ac7pcm...")
+		self.log.info("Initializing an7cm...")
 
-		# identify the arctis 7+ device
+		# identify the arctis nova 7 device
 		try:
 			self.dev = hid.device()
 			self.dev.open(0x1038, 0x2202)
 		except Exception as e:
-			self.log.error("""Failed to identify the Arctis 7+ device.
+			self.log.error("""Failed to identify the Arctis Nova 7 device.
 			Please ensure it is connected.\n
-			Please note: This program only supports the '7+' model.""")
+			Please note: This program only supports the 'Nova 7' model.""")
 			self.die_gracefully(trigger)
 
 		self.VAC = self._init_VAC()
@@ -72,9 +72,9 @@ class Arctis7PlusChatMix:
 
 		# Destroy virtual sinks if they already existed incase of previous failure:
 		try:
-			destroy_a7p_game = os.system("pw-cli destroy Arctis_Game 2>/dev/null")
-			destroy_a7p_chat = os.system("pw-cli destroy Arctis_Chat 2>/dev/null")
-			if destroy_a7p_game == 0 or destroy_a7p_chat == 0:
+			destroy_an7_game = os.system("pw-cli destroy Arctis_Game 2>/dev/null")
+			destroy_an7_chat = os.system("pw-cli destroy Arctis_Chat 2>/dev/null")
+			if destroy_an7_game == 0 or destroy_an7_chat == 0:
 				raise Exception
 		except Exception as e:
 			self.log.info("""Attempted to destroy old VAC sinks at init but none existed""")
@@ -85,7 +85,7 @@ class Arctis7PlusChatMix:
 			os.system("""pw-cli create-node adapter '{
 				factory.name=support.null-audio-sink
 				node.name=Arctis_Game
-				node.description="Arctis 7+ Game"
+				node.description="Arctis Nova 7 Game"
 				media.class=Audio/Sink
 				monitor.channel-volumes=true
 				object.linger=true
@@ -96,7 +96,7 @@ class Arctis7PlusChatMix:
 			os.system("""pw-cli create-node adapter '{
 				factory.name=support.null-audio-sink
 				node.name=Arctis_Chat
-				node.description="Arctis 7+ Chat"
+				node.description="Arctis Nova 7 Chat"
 				media.class=Audio/Sink
 				monitor.channel-volumes=true
 				object.linger=true
@@ -139,19 +139,21 @@ class Arctis7PlusChatMix:
 
 		self.log.info("Reading modulator USB input started")
 		self.log.info("-"*45)
-		self.log.info("Arctis 7+ ChatMix Enabled!")
+		self.log.info("Arctis Nova 7 ChatMix Enabled!")
 		self.log.info("-"*45)
 		last = None
 		while True:
 			try:
 				self.dev.write([0x00, 0xb0])
 				resp = self.dev.read(8)
-				if resp != last:
-					last = resp
-					os.system(f'pactl set-sink-volume Arctis_Game {resp[4]}%')
-					os.system(f'pactl set-sink-volume Arctis_Chat {resp[5]}%')
-				else:
+				game,chat = resp[4], resp[5]
+				if game <= 100 and chat <= 100 and (game,chat) != last:
+					last = (game,chat)
+					os.system(f'pactl set-sink-volume Arctis_Game {game}%')
+					os.system(f'pactl set-sink-volume Arctis_Chat {chat}%')
 					time.sleep(0.1)
+				else:
+					time.sleep(0.2)
 			except Exception as e:
 				pass
 
@@ -179,11 +181,11 @@ class Arctis7PlusChatMix:
 			sys.exit(1)
 		else:
 			self.log.info("-"*45)
-			self.log.info("Artcis 7+ ChatMix shut down gracefully... Bye Bye!")
+			self.log.info("Artcis Nova 7 ChatMix shut down gracefully... Bye Bye!")
 			self.log.info("-"*45)
 			sys.exit(0)
 
 # init
 if __name__ == '__main__':
-	a7pcm_service = Arctis7PlusChatMix()
-	a7pcm_service.start_modulator_signal()
+	an7cm_service = ArctisNova7ChatMix()
+	an7cm_service.start_modulator_signal()
