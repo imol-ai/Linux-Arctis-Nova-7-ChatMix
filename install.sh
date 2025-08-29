@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ "$USER" == root ]]; then
     echo "Please run the install script as non-root user."
